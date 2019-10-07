@@ -1,7 +1,7 @@
 parameters:
 #  analyzeCodeScript : 'analyze-code.ps1'
 #  organization : 'rodfontessoares-github'
-  project : 'rodfontessoares_flyway-tsqlt-azure-demo'
+  project : 'rodfontessoares_flyway-tsqlt-azure-demo-starter'
   qualityGateScript : 'pipeline/01-build-stage/quality-steps/get-quality-gate-sonarcloud.ps1'
 
 steps:
