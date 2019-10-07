@@ -1,0 +1,25 @@
+parameters:
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+steps:
+# Copy files from source folder to target folder
+- task: CopyFiles@2
+  inputs:
+    # WARNING: Only the migrations folder should be copied. tSQLt and pipeline scripts are a security
+    # vulnerability in a Production environment.
+
+    # Excluding "ps", "sql" and "tests" folders (i.e. the ones that contain vulnerable tSQLt code)
+    Contents: |
+      **\migrations\**
+      **\flyway.*
+      !**\test*
+    TargetFolder: ${{parameters.targetFolder}}
+    #CleanTargetFolder: true
+    OverWrite: true
+# Tests passed, so push the FlyWay migrations up the CI pipeline as a Build Artifact
+- task: PublishPipelineArtifact@0
+  displayName: 'Publish Migration Scripts as Build Artifact'
+  inputs:
+    artifactName: ${{parameters.databaseName}}
+    targetPath: ${{parameters.targetFolder}}

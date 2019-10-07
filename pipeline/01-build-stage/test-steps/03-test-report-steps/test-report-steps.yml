@@ -1,0 +1,15 @@
+parameters:
+  createReportScript: 'pipeline/01-build-stage/test-steps/03-test-report-steps/create-report.ps1'
+  createReportSQL: 'pipeline/01-build-stage/test-steps/03-test-report-steps/create-report.sql'
+
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+
+steps:
+- task: PowerShell@2
+  displayName: 'Creating test results report...'
+  condition: always() #Always generate report, otherwise we won't know which test failed
+  inputs:
+    targetType: filePath
+    filePath: ${{parameters.createReportScript}}
+    arguments: -servername 'localhost' -databaseName '${{parameters.databaseName}}-${{parameters.environmentName}}' -createReportSQL ${{parameters.createReportSQL}}

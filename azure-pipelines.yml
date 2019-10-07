@@ -1,0 +1,49 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+variables:      # pipeline-level
+  databaseName: 'flyway-tsqlt-azure-demo-starter'
+  packageName: $(databaseName)
+
+  dev : 'Dev'
+  uat : 'UAT'
+  prod : 'Prod'
+
+  deployScript: 'pipeline/util/flyway.ps1'
+
+  devDeployPool: '3CDCC-Dev'
+  uatDeployPool: '3CDCC-UAT'
+  prodDeployPool: '3CDCC-Prod'
+
+stages:
+- stage: Build
+  jobs:
+  - template: pipeline/01-build-stage/build-job.yml  # Template reference
+    parameters:
+      deployScript: $(deployScript)
+      databaseName: $(databaseName)
+      environmentName: $(dev)
+      deployPool: $(devDeployPool)
+
+- stage: DeployToUAT
+  jobs:
+  - template: pipeline/02-uat-stage/uat-deploy-job.yml  # Template reference
+    parameters:
+      deployScript: $(deployScript)
+      databaseName: $(databaseName)
+      environmentName: $(uat)
+      deployPool: $(uatDeployPool)
+
+- stage: DeployToProd
+  jobs:
+  - template: pipeline/03-prod-stage/prod-deploy-job.yml  # Template reference
+    parameters:
+      deployScript: $(deployScript)
+      databaseName: $(databaseName)
+      environmentName: $(prod)
+      deployPool: $(prodDeployPool)

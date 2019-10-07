@@ -1,0 +1,25 @@
+# Parameters should be specified by the parent YAML that consumes this template
+parameters:
+  deployScript: 'PleaseProvideThroughTheParentYAML'  
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+  deployPool: 'PleaseProvideThroughTheParentYAML'
+
+jobs:
+  - job: Deploy
+    displayName: 'Deploying to Prod DB...'
+    pool:
+      name: ${{ parameters.deployPool }}
+    steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Downloading Build Artifacts...'
+      inputs:
+        buildType: 'current'
+        artifactname: ${{parameters.databaseName}}
+        targetPath: '$(System.ArtifactsDirectory)'
+    - task: PowerShell@2
+      displayName: 'Deploying to Prod DB...'
+      inputs:
+        targetType: filePath
+        filePath: '$(System.ArtifactsDirectory)/${{parameters.deployScript}}'
+        arguments: -databaseName ${{parameters.databaseName}} -environmentName ${{parameters.environmentName}}

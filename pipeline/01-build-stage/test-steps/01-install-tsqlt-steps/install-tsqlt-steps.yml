@@ -1,0 +1,25 @@
+parameters:
+  setupCLRscript: 'pipeline/01-build-stage/test-steps/01-install-tsqlt-steps/setup-clr.ps1'
+  setupClrSQL: 'pipeline/01-build-stage/test-steps/01-install-tsqlt-steps/clr-enabled_strict-security.sql'
+  
+  installTSQLtScript: 'pipeline/01-build-stage/test-steps/01-install-tsqlt-steps/install-tsqlt.ps1'
+  installTSQLtSQL: 'pipeline/01-build-stage/test-steps/01-install-tsqlt-steps/tSQLt.class.sql'
+
+
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+
+steps:
+  # WARNING: DO NOT DO THIS IN PRODUCTION! Huge security vulnerability, but necessary to use tSQLt. Only use in Dev
+  - task: PowerShell@2
+    displayName: 'Setting up CLR on Dev DB...'
+    inputs:
+      targetType: filePath
+      filePath: ${{parameters.setupCLRscript}}
+      arguments: -servername 'localhost' -databaseName '${{parameters.databaseName}}-${{parameters.environmentName}}' -setupClrSQL ${{parameters.setupClrSQL}}
+  - task: PowerShell@2
+    displayName: 'Installing tSQLt on Dev DB...'
+    inputs:
+      targetType: filePath
+      filePath: ${{parameters.installTSQLtScript}}
+      arguments: -servername 'localhost' -databaseName '${{parameters.databaseName}}-${{parameters.environmentName}}' -installTSQLtSQL ${{parameters.installTSQLtSQL}}

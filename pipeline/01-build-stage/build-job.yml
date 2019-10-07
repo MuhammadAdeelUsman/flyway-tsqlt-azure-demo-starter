@@ -1,0 +1,60 @@
+# Parameters should be specified by the parent YAML that consumes this template
+parameters:
+  deployScript: 'PleaseProvideThroughTheParentYAML'
+
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+  deployPool: 'PleaseProvideThroughTheParentYAML'
+
+jobs:
+  - job: BuildJob
+    displayName: 'Integrating on ${{parameters.environmentName}} DB'
+    pool:
+      name: ${{parameters.deployPool}}
+    steps:
+      # Build. Simple for now, so no need to use a "-template"
+    - task: PowerShell@2
+      displayName: 'CI build on Dev DB. Appplying Flyway SQL Migrations...'
+      inputs:
+        targetType: filePath
+        filePath: ${{parameters.deployScript}}
+        arguments: -databaseName ${{parameters.databaseName}} -environmentName ${{parameters.environmentName}}
+
+  - job: TestJob
+    displayName: 'Running unit tests on ${{parameters.environmentName}} DB'
+    pool:
+      name: ${{parameters.deployPool}}
+    dependsOn: BuildJob
+    steps:
+      # Test
+      - template: test-steps/test-steps.yml  # Template reference
+        parameters:
+          databaseName: ${{parameters.databaseName}}
+          environmentName: ${{parameters.environmentName}}
+
+  - job: QualityJob
+    displayName: 'Inspecting code quality with SonarCloud...'
+    pool:
+      # Since this job merely calls SonarQube, it can be assigned to an Azure cloud agent
+      # These agents have Java installed on them by default, which is all that is required
+      vmImage: 'windows-2019'
+    dependsOn: BuildJob
+    steps:
+      # Quality
+      - template: quality-steps/quality-steps.yml  # Template reference
+        parameters:
+          databaseName: ${{parameters.databaseName}}
+          environmentName: ${{parameters.environmentName}}
+
+  - job: PublishJob
+    displayName: 'Publishing migrations...'
+    pool:
+      name: ${{parameters.deployPool}}
+    dependsOn:
+      - TestJob
+      - QualityJob
+    steps:
+      # Publish
+      - template: publish-steps/publish-steps.yml  # Template reference
+        parameters:
+          databaseName: ${{parameters.databaseName}}

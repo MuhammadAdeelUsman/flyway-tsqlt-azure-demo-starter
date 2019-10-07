@@ -1,0 +1,14 @@
+parameters:
+  deployScript: 'PleaseProvideThroughTheParentYAML'
+
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+
+steps:
+  # Build. Simple for now, so no need to use a "-template"
+  - task: PowerShell@2
+    displayName: 'CI build on Dev DB. Appplying Flyway SQL Migrations...'
+    inputs:
+      targetType: filePath
+      filePath: ${{parameters.deployScript}}
+      arguments: -databaseName ${{parameters.databaseName}} -environmentName ${{parameters.environmentName}}

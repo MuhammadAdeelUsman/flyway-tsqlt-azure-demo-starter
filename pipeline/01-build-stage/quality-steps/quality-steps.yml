@@ -1,0 +1,30 @@
+parameters:
+#  analyzeCodeScript : 'analyze-code.ps1'
+#  organization : 'rodfontessoares-github'
+  project : 'rodfontessoares_flyway-tsqlt-azure-demo'
+  qualityGateScript : 'pipeline/01-build-stage/quality-steps/get-quality-gate-sonarcloud.ps1'
+
+steps:
+#- task: PowerShell@2
+#  displayName: 'Inspecting code quality with SonarCloud...'
+#    inputs:
+#      targetType: filePath
+#      filePath: ${{parameters.analyzeCodeScript}}
+- task: SonarCloudPrepare@1
+  inputs:
+    SonarCloud: 'SonarCloud'
+    organization: 'rodfontessoares-github'
+    scannerMode: 'CLI'
+    configMode: 'file' # This means SonarCloud will use the "sonar-project.properties" file, in this repo's root
+- task: SonarCloudAnalyze@1
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
+- task: PowerShell@2
+  # If SonarCloud's Quality Gate is NOT "OK"/"Passed", the Build will fail,
+  # and no new deployments will occur until the Quality Gate goes back to "Passed"
+  displayName: 'Validating SonarCloud quality gate...'
+  inputs:
+    targetType: filePath
+    filePath: ${{parameters.qualityGateScript}}
+    arguments: -project ${{parameters.project}}

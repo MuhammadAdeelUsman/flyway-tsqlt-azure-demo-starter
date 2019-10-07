@@ -1,0 +1,22 @@
+parameters:
+  createTestsScript: 'pipeline/01-build-stage/test-steps/02-run-tests-steps/create-tests.ps1'
+  testsDirectory: 'tests'
+
+  runTestsScript: 'pipeline/01-build-stage/test-steps/02-run-tests-steps/run-tests.ps1'
+
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+
+steps:
+  - task: PowerShell@2
+    displayName: 'Creating Tests on Dev DB...'
+    inputs:
+      targetType: filePath
+      filePath: ${{parameters.createTestsScript}}
+      arguments: -servername 'localhost' -databaseName '${{parameters.databaseName}}-${{parameters.environmentName}}' -testsDirectory ${{parameters.testsDirectory}}
+  - task: PowerShell@2
+    displayName: 'Running Tests on Dev DB...'
+    inputs:
+      targetType: filePath
+      filePath: ${{parameters.runTestsScript}}
+      arguments: -servername 'localhost' -databaseName '${{parameters.databaseName}}-${{parameters.environmentName}}'

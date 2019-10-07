@@ -1,0 +1,20 @@
+parameters:
+  databaseName: 'PleaseProvideThroughTheParentYAML'
+  environmentName: 'PleaseProvideThroughTheParentYAML'
+
+steps:
+  # WARNING: DO NOT INSTALL tSQLt IN PRODUCTION! Huge security vulnerability, but necessary in Dev
+  - template: 01-install-tsqlt-steps/install-tsqlt-steps.yml  # Template reference
+    parameters:
+      databaseName: ${{parameters.databaseName}}
+      environmentName: ${{parameters.environmentName}}
+  
+  - template: 02-run-tests-steps/run-tests-steps.yml  # Template reference
+    parameters:
+      databaseName: ${{parameters.databaseName}}
+      environmentName: ${{parameters.environmentName}}
+  
+  - template: 03-test-report-steps/test-report-steps.yml  # Template reference
+    parameters:
+      databaseName: ${{parameters.databaseName}}
+      environmentName: ${{parameters.environmentName}}
